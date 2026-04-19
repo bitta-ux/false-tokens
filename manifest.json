@@ -1,6 +1,6 @@
 {
   "name": "False Tokens",
-  "id": "1526224395293662746",
+  "id": <"add your Plugin-ID here">,
   "api": "1.0.0",
   "main": "code.js",
   "ui": "ui.html",
