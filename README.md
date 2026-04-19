@@ -2,7 +2,7 @@
 
 **A Figma plugin that finds elements in your design that are using raw values instead of design tokens.**
 
-Available on the [Figma Community](https://www.figma.com/community).
+Available on the [Figma Community](https://www.figma.com/community/plugin/1526224395293662746/false-tokens).
 
 ---
 
@@ -91,6 +91,14 @@ No build step required — the plugin runs directly from `code.js` and `ui.html`
 - Scans up to **10,000 nodes** per run. For very large files, consider scanning specific frames rather than the full page.
 - Only detects **solid** fills and strokes. Gradients, images, and other paint types are not flagged.
 - Mixed-format text layers (with multiple styles applied) are detected at the node level.
+
+---
+
+## Author
+
+Name: Bitta Singha
+Linkedin: www.linkedin.com/in/bitta-singha-97a22a1b6
+Instagram: [@bitta.ux](https://instagram.com/bitta.ux)
 
 ---
 
