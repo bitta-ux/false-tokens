@@ -97,8 +97,8 @@ No build step required — the plugin runs directly from `code.js` and `ui.html`
 ## Author
 
 Name: Bitta Singha
-Linkedin: www.linkedin.com/in/bitta-singha-97a22a1b6
-Instagram: [@bitta.ux](https://instagram.com/bitta.ux)
+- Linkedin: www.linkedin.com/in/bitta-singha-97a22a1b6
+- Instagram: [@bitta.ux](https://instagram.com/bitta.ux)
 
 ---
 
