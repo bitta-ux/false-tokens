@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>False Tokens</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 12px;
+      background: linear-gradient(135deg, #f0f4f8 0%, #e6eef7 100%);
+      color: #1a1a1a;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Celebration Container */
+    .celebration-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    /* Particle Base */
+    .particle {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    /* Sparkle Stars */
+    .sparkle-star {
+      width: 8px;
+      height: 8px;
+      animation: sparkle-burst linear forwards;
+    }
+
+    .sparkle-star::before {
+      content: '';
+      position: absolute;
+      width: 8px;
+      height: 2px;
+      background: currentColor;
+      border-radius: 1px;
+      top: 3px;
+      left: 0;
+    }
+
+    .sparkle-star::after {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 8px;
+      background: currentColor;
+      border-radius: 1px;
+      top: 0;
+      left: 3px;
+    }
+
+    /* Confetti Pieces */
+    .confetti-square {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      animation: confetti-burst linear forwards;
+    }
+
+    .confetti-circle {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      animation: confetti-burst linear forwards;
+    }
+
+    .confetti-triangle {
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 8px solid currentColor;
+      animation: confetti-burst linear forwards;
+    }
+
+    /* Firework Particles */
+    .firework-particle {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      animation: firework-burst ease-out forwards;
+    }
+
+    /* Sparkle Burst Animation */
+    @keyframes sparkle-burst {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(0) rotate(0deg);
+      }
+      15% {
+        opacity: 1;
+        transform: translate(var(--dx), var(--dy)) scale(1.2) rotate(180deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(calc(var(--dx) * 2), calc(var(--dy) * 2)) scale(0.3) rotate(720deg);
+      }
+    }
+
+    /* Confetti Burst Animation */
+    @keyframes confetti-burst {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(0.2) rotate(var(--rotation));
+      }
+    }
+
+    /* Firework Burst Animation */
+    @keyframes firework-burst {
+      0% {
+        opacity: 1;
+        transform: translate(0, 0) scale(1);
+        box-shadow: 0 0 2px currentColor;
+      }
+      100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(0);
+        box-shadow: 0 0 10px currentColor;
+      }
+    }
+
+    /* Shimmer Effect */
+    .shimmer-overlay {
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.4) 50%,
+        transparent 100%
+      );
+      animation: shimmer 1.5s ease-out;
+    }
+
+    @keyframes shimmer {
+      0% {
+        left: -100%;
+      }
+      100% {
+        left: 100%;
+      }
+    }
+
+    /* Pulse Effect for Target Element */
+    .celebration-pulse {
+      animation: celebration-pulse 0.6s ease-out;
+    }
+
+    @keyframes celebration-pulse {
+      0% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+      50% {
+        transform: scale(1.05);
+        filter: brightness(1.2);
+        box-shadow: 0 8px 32px rgba(22, 163, 74, 0.4);
+      }
+      100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+    }
+
+    /* Fixed Notification Animations */
+    @keyframes fixedNotificationIn {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+    
+    @keyframes fixedNotificationOut {
+      0% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.9);
+      }
+    }
+
+    .header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+
+    .header .subtitle {
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    .scope-info {
+      background: rgba(24, 160, 251, 0.1);
+      color: #18A0FB;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(24, 160, 251, 0.15);
+    }
+
+    .scope-icon {
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.7);
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .audit-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .mode-selector {
+      display: flex;
+      background: #f4f5f6;
+      border-radius: 8px;
+      padding: 4px;
+      flex: 1;
+    }
+
+    .mode-option {
+      flex: 1;
+      text-align: center;
+    }
+
+    .mode-option input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .mode-option label {
+      display: block;
+      padding: 8px 0;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      color: #666;
+      font-size: 11px;
+    }
+
+    .mode-option input:checked + label {
+      background: rgba(255, 255, 255, 0.85);
+      color: #18A0FB;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .scan-button {
+      background: linear-gradient(180deg, #18A0FB, #0D8ED9);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      min-width: 80px;
+    }
+
+    .scan-button:hover:not(:disabled) {
+      background: linear-gradient(180deg, #0D8ED9, #0A7BC7);
+      transform: translateY(-1px);
+    }
+
+    .scan-button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+
+    /* Options Section */
+    .options-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    /* Toggle Switch */
+    .toggle-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .toggle-option input[type="checkbox"] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: relative;
+      width: 44px;
+      height: 24px;
+      background: #f4f5f6;
+      border-radius: 24px;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .toggle-option input:checked + .toggle-slider {
+      background: #18A0FB;
+      border-color: #18A0FB;
+    }
+
+    .toggle-option input:checked + .toggle-slider::before {
+      transform: translateX(20px);
+    }
+
+    .toggle-option:hover .toggle-slider {
+      background: #e9ecef;
+    }
+
+    .toggle-option input:checked:hover + .toggle-slider {
+      background: #0D8ED9;
+    }
+
+    .toggle-label {
+      flex: 1;
+      font-weight: 500;
+    }
+
+    /* Hidden Indicator */
+    .hidden-indicator {
+      background: rgba(107, 114, 128, 0.1);
+      color: #6B7280;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(107, 114, 128, 0.15);
+    }
+
+    .content {
+      height: calc(100vh - 200px);
+      overflow-y: auto;
+      padding: 8px 16px;
+      padding-bottom: 60px;
+    }
+
+    .help-text {
+      padding: 16px;
+      color: #666;
+      font-size: 11px;
+      line-height: 1.5;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 16px;
+      margin: 0 0 16px;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: #666;
+      font-size: 13px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 16px;
+      margin: 16px 0;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 200px;
+      color: #666;
+      text-align: center;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 16px;
+      margin: 16px 0;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .success-state {
+      background: rgba(22, 163, 74, 0.1);
+      border: 1px solid rgba(22, 163, 74, 0.2);
+      color: #16A14E;
+    }
+
+    .stats {
+      padding: 14px 16px;
+      background: rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      font-size: 11px;
+      color: #666;
+      text-align: center;
+      margin: 8px 0 16px 0;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    .stats.warning {
+      background: rgba(217, 119, 6, 0.1);
+      color: #D97706;
+      border-color: rgba(217, 119, 6, 0.2);
+    }
+
+    .stats.success {
+      background: rgba(22, 163, 74, 0.1);
+      color: #16A14E;
+      border-color: rgba(22, 163, 74, 0.2);
+    }
+
+    .results-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .result-item {
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 12px;
+      margin-bottom: 6px;
+      transition: all 0.25s ease;
+      cursor: pointer;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      overflow: hidden;
+    }
+
+    .result-item:hover {
+      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .result-content {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+    }
+
+    .result-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      margin-right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .result-icon.text {
+      background: rgba(156, 39, 176, 0.1);
+      color: #9c27b0;
+    }
+
+    .result-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .result-name {
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+      font-size: 13px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-path {
+      font-size: 10px;
+      color: #666;
+      margin-bottom: 6px;
+      opacity: 0.8;
+    }
+
+    .result-details {
+      font-size: 11px;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .result-type {
+      background: rgba(24, 160, 251, 0.1);
+      color: #18A0FB;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(24, 160, 251, 0.15);
+    }
+
+    .result-property {
+      background: rgba(239, 68, 68, 0.1);
+      color: #EF4444;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-size: 9px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(239, 68, 68, 0.15);
+    }
+
+    .result-property.stroke {
+      background: rgba(217, 119, 6, 0.1);
+      color: #D97706;
+      border: 1px solid rgba(217, 119, 6, 0.15);
+    }
+
+    .result-property.text-style {
+      background: rgba(156, 39, 176, 0.1);
+      color: #9c27b0;
+      border: 1px solid rgba(156, 39, 176, 0.15);
+    }
+
+    .color-hex {
+      font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .text-details {
+      font-family: Monaco, Menlo, 'Ubuntu Mono', monospace;
+      background: rgba(0, 0, 0, 0.05);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      letter-spacing: 0.2px;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+      z-index: 20;
+    }
+
+    .footer a {
+      color: #18A0FB;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Celebration Container -->
+  <div class="celebration-container" id="celebrationContainer"></div>
+
+  <div class="header">
+    <h1>False Tokens</h1>
+    <div class="subtitle">Find elements not using design tokens</div>
+
+    <div class="scope-info" id="scopeInfo">
+      <span class="scope-icon" id="scopeIcon">📄</span>
+      <span id="scopeText">Loading...</span>
+    </div>
+
+    <div class="audit-controls">
+      <div class="mode-selector">
+        <div class="mode-option">
+          <input type="radio" id="colorMode" name="mode" value="color" checked>
+          <label for="colorMode">Colors</label>
+        </div>
+        <div class="mode-option">
+          <input type="radio" id="textMode" name="mode" value="text">
+          <label for="textMode">Text</label>
+        </div>
+      </div>
+      <button class="scan-button" id="scanButton">Scan</button>
+    </div>
+
+    <div class="options-section">
+      <label class="toggle-option">
+        <input type="checkbox" id="includeHiddenToggle">
+        <span class="toggle-slider"></span>
+        <span class="toggle-label">Include hidden elements</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="content" id="content">
+    <div class="help-text">
+      <strong>How to use:</strong><br>
+      1. Select a frame, component, or leave unselected for entire page<br>
+      2. Choose scan type: Colors or Text elements<br>
+      3. Toggle "Include hidden elements" to control visibility scope<br>
+      4. Click Scan to find elements not using design tokens<br>
+      5. Click any result to navigate directly to that element
+    </div>
+  </div>
+
+  <footer class="footer">
+    Follow me on instagram ❤️ - <a href="https://www.instagram.com/bitta.ui/" target="_blank">@bitta.ui</a>
+  </footer>
+
+  <script>
+    let isScanning = false;
+    let currentResults = [];
+    let currentScope = null;
+
+    const scanButton = document.getElementById('scanButton');
+    const content = document.getElementById('content');
+    const scopeInfo = document.getElementById('scopeInfo');
+    const scopeIcon = document.getElementById('scopeIcon');
+    const scopeText = document.getElementById('scopeText');
+
+    // Send initial message to get plugin data
+    parent.postMessage({ pluginMessage: { type: 'get-initial-data' } }, '*');
+
+    // Event listeners
+    scanButton.addEventListener('click', function() {
+      if (isScanning) return;
+      
+      const selectedMode = document.querySelector('input[name="mode"]:checked').value;
+      const includeHidden = document.getElementById('includeHiddenToggle').checked;
+      
+      isScanning = true;
+      scanButton.disabled = true;
+      scanButton.textContent = 'Scanning...';
+      
+      const modeText = selectedMode === 'color' ? 'color elements' : 'text elements';
+      const hiddenText = includeHidden ? ' (including hidden)' : ' (visible only)';
+      content.innerHTML = '<div class="loading">🔍 Scanning for ' + modeText + hiddenText + '...</div>';
+      
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'scan-tokens', 
+          mode: selectedMode,
+          includeHidden: includeHidden
+        } 
+      }, '*');
+    });
+
+    function updateScopeInfo(scope) {
+      if (!scope) return;
+      
+      const icon = scope.icon || '📄';
+      scopeIcon.textContent = icon;
+      scopeText.textContent = scope.description;
+    }
+
+    function getSelectedMode() {
+      const selectedRadio = document.querySelector('input[name="mode"]:checked');
+      return selectedRadio ? selectedRadio.value : 'color';
+    }
+
+    // Enhanced navigation function
+    function navigateToNode(nodeId, resultIndex) {
+      const result = currentResults[resultIndex];
+      
+      parent.postMessage({ 
+        pluginMessage: { 
+          type: 'navigate-to-node', 
+          nodeId: nodeId,
+          resultData: {
+            mode: getSelectedMode(),
+            property: result.property,
+            fillIndex: result.fillIndex,
+            strokeIndex: result.strokeIndex
+          }
+        } 
+      }, '*'); 
+    }
+
+    // Handle messages from plugin
+    window.onmessage = function(event) {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      if (msg.type === 'initial-data') {
+        currentScope = msg.scope;
+        updateScopeInfo(msg.scope);
+      }
+
+      if (msg.type === 'scope-updated') {
+        currentScope = msg.scope;
+        updateScopeInfo(msg.scope);
+      }
+      
+      if (msg.type === 'scan-results') {
+        isScanning = false;
+        scanButton.disabled = false;
+        scanButton.textContent = 'Scan';
+        
+        if (msg.error) {
+          renderError(msg.error);
+        } else {
+          renderResults(msg.results, msg.mode, msg.searchScope, msg.processedNodes, msg.limited, msg.skippedHiddenNodes, msg.includeHidden);
+        }
+      }
+
+      // New handler for fixed issues
+      if (msg.type === 'issue-fixed') {
+        showFixedNotification(msg.nodeName, msg.resultData);
+      }
+      
+      if (msg.type === 'error') {
+        isScanning = false;
+        scanButton.disabled = false;
+        scanButton.textContent = 'Scan';
+        content.innerHTML = '<div class="empty-state"><p style="color: #EF4444;">Error: ' + escapeHtml(msg.message) + '</p></div>';
+      }
+
+      if (msg.type === 'navigation-success') {
+        console.log('Navigated to:', msg.nodeName);
+      }
+    };
+
+    // Show notification when issue is fixed
+    function showFixedNotification(nodeName, resultData) {
+      // Create a temporary notification overlay
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: linear-gradient(135deg, #16A14E, #059669);
+        color: white;
+        padding: 20px 24px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: center;
+        z-index: 10000;
+        box-shadow: 0 20px 40px rgba(22, 163, 74, 0.3);
+        animation: fixedNotificationIn 0.3s ease-out;
+        max-width: 280px;
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+      `;
+      
+      notification.innerHTML = `
+        <div style="font-size: 24px; margin-bottom: 8px;">✅</div>
+        <div style="margin-bottom: 4px;">Issue Fixed!</div>
+        <div style="font-size: 12px; opacity: 0.9; font-weight: 400;">
+          "${escapeHtml(nodeName)}" is now using design tokens
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Trigger celebration effect
+      setTimeout(() => {
+        triggerMiniCelebration();
+      }, 100);
+      
+      // Remove notification after delay
+      setTimeout(() => {
+        notification.style.animation = 'fixedNotificationOut 0.3s ease-out forwards';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.remove();
+          }
+        }, 300);
+      }, 2500);
+    }
+
+    // Mini celebration for individual fixes
+    function triggerMiniCelebration() {
+      const celebrationContainer = document.getElementById('celebrationContainer');
+      const colors = ['#16A14E', '#18A0FB', '#8B5CF6', '#F59E0B'];
+      const centerX = 190;
+      const centerY = 300;
+      
+      // Small sparkle burst
+      for (let i = 0; i < 8; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'particle sparkle-star';
+        
+        const angle = (i / 8) * Math.PI * 2;
+        const distance = 30 + Math.random() * 20;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        
+        sparkle.style.left = centerX + 'px';
+        sparkle.style.top = centerY + 'px';
+        sparkle.style.color = colors[Math.floor(Math.random() * colors.length)];
+        sparkle.style.setProperty('--dx', dx + 'px');
+        sparkle.style.setProperty('--dy', dy + 'px');
+        sparkle.style.animationDuration = '0.6s';
+        sparkle.style.animationDelay = (Math.random() * 0.1) + 's';
+        
+        sparkle.style.zIndex = '9999';
+        
+        celebrationContainer.appendChild(sparkle);
+      }
+      
+      // Clean up
+      setTimeout(() => {
+        const sparkles = celebrationContainer.querySelectorAll('.sparkle-star');
+        sparkles.forEach(s => s.remove());
+      }, 1000);
+    }
+
+    function renderResults(results, mode, searchScope, processedNodes, limited, skippedHiddenNodes, includeHidden) {
+      currentResults = results;
+      
+      if (results.length === 0) {
+        const elementType = mode === 'color' ? 'color elements' : 'text elements';
+        const hiddenText = !includeHidden && skippedHiddenNodes > 0 ? ', skipped ' + skippedHiddenNodes + ' hidden elements' : '';
+        const scopeText = includeHidden ? ' (including hidden)' : ' (visible only)';
+        content.innerHTML = 
+          '<div class="empty-state success-state">' +
+            '<div class="empty-state-icon">✅</div>' +
+            '<p><strong>Perfect!</strong></p>' +
+            '<p>All ' + elementType + ' are using design tokens</p>' +
+            '<p style="margin-top: 8px; font-size: 10px;">in ' + escapeHtml(searchScope.description) + scopeText + '</p>' +
+          '</div>' +
+          '<div class="stats success">' +
+            'Scanned ' + processedNodes + ' elements' + hiddenText + (limited ? ' (scan limit reached)' : '') +
+          '</div>';
+        
+        // Trigger enhanced celebration for perfect score!
+        setTimeout(function() {
+          triggerEnhancedCelebration();
+        }, 400); // Small delay to let the results appear first
+        
+        return;
+      }
+      
+      const elementType = mode === 'color' ? 'color elements' : 'text elements';
+      const warningText = limited ? ' (scan limit reached - results may be incomplete)' : '';
+      const hiddenText = !includeHidden && skippedHiddenNodes > 0 ? ', skipped ' + skippedHiddenNodes + ' hidden elements' : '';
+      const scopeText = includeHidden ? ' (including hidden)' : ' (visible only)';
+      
+      let html = '<div class="stats warning">' +
+        'Found ' + results.length + ' ' + elementType + ' without design tokens in ' + escapeHtml(searchScope.description) + scopeText + hiddenText + warningText +
+        '</div>';
+
+      html += '<ul class="results-list">';
+
+      for (let i = 0; i < results.length; i++) {
+        const result = results[i];
+        html += createResultItem(result, i, mode);
+      }
+
+      html += '</ul>';
+      content.innerHTML = html;
+    }
+
+    function createResultItem(result, index, mode) {
+      let iconHtml = '';
+      let detailsHtml = '';
+      let pathHtml = result.path && result.path.length > 0 
+        ? '<div class="result-path">' + escapeHtml(result.path.join(' > ')) + '</div>'
+        : '';
+      
+      // Add hidden indicator if the element is hidden
+      let hiddenIndicator = result.isHidden ? '<span class="hidden-indicator">👁️‍🗨️ Hidden</span>' : '';
+
+      if (mode === 'color') {
+        iconHtml = '<div class="result-icon color" style="background-color: ' + result.color + '"></div>';
+        detailsHtml = 
+          '<span class="result-type">' + result.type + '</span>' +
+          '<span class="result-property ' + result.property + '">' + result.property + '</span>' +
+          '<span class="color-hex">' + result.color + '</span>' +
+          hiddenIndicator;
+      } else {
+        iconHtml = '<div class="result-icon text">Aa</div>';
+        detailsHtml = 
+          '<span class="result-type">' + result.type + '</span>' +
+          '<span class="result-property text-style">text style</span>' +
+          '<span class="text-details">' + result.fontSize + ' ' + result.fontFamily + '</span>' +
+          hiddenIndicator;
+      }
+
+      return '<li class="result-item" onclick="navigateToNode(\'' + result.id + '\', ' + index + ')">' +
+        '<div class="result-content">' +
+          iconHtml +
+          '<div class="result-info">' +
+            '<div class="result-name">' + escapeHtml(result.name || 'Unnamed') + '</div>' +
+            pathHtml +
+            '<div class="result-details">' +
+              detailsHtml +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</li>';
+    }
+
+    function renderError(error) {
+      content.innerHTML = 
+        '<div class="empty-state">' +
+          '<div class="empty-state-icon" style="color: #EF4444;">⚠</div>' +
+          '<p style="color: #EF4444;">' + escapeHtml(error) + '</p>' +
+        '</div>';
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function triggerEnhancedCelebration() {
+      const celebrationContainer = document.getElementById('celebrationContainer');
+      
+      // Clear any existing animations
+      celebrationContainer.innerHTML = '';
+      
+      // Add pulse effect to success state
+      const successState = document.querySelector('.success-state');
+      if (successState) {
+        successState.classList.add('celebration-pulse');
+        setTimeout(function() {
+          successState.classList.remove('celebration-pulse');
+        }, 600);
+      }
+      
+      // Color palette for celebrations
+      const colors = [
+        '#16A14E', // Success green
+        '#18A0FB', // Primary blue  
+        '#8B5CF6', // Purple
+        '#F59E0B', // Amber
+        '#EF4444', // Red
+        '#EC4899', // Pink
+        '#10B981', // Emerald
+        '#3B82F6'  // Blue
+      ];
+      
+      const centerX = 190; // Middle of 380px width
+      const centerY = 300; // Middle of 600px height
+      
+      // 1. Sparkle stars burst
+      createSparkleBurst(celebrationContainer, centerX, centerY, colors);
+      
+      // 2. Confetti explosion
+      setTimeout(function() {
+        createConfettiBurst(celebrationContainer, centerX, centerY, colors);
+      }, 100);
+      
+      // 3. Firework particles
+      setTimeout(function() {
+        createFireworkBurst(celebrationContainer, centerX, centerY, colors);
+      }, 200);
+      
+      // 4. Shimmer effect
+      setTimeout(function() {
+        createShimmerEffect(celebrationContainer);
+      }, 300);
+      
+      // Clean up after animation completes
+      setTimeout(function() {
+        celebrationContainer.innerHTML = '';
+      }, 3000);
+    }
+
+    function createSparkleBurst(container, centerX, centerY, colors) {
+      const sparkleCount = 20;
+      
+      for (let i = 0; i < sparkleCount; i++) {
+        const sparkle = document.createElement('div');
+        sparkle.className = 'particle sparkle-star';
+        
+        const angle = (i / sparkleCount) * Math.PI * 2;
+        const distance = 80 + Math.random() * 60;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        
+        sparkle.style.left = centerX + 'px';
+        sparkle.style.top = centerY + 'px';
+        sparkle.style.color = colors[Math.floor(Math.random() * colors.length)];
+        sparkle.style.setProperty('--dx', dx + 'px');
+        sparkle.style.setProperty('--dy', dy + 'px');
+        sparkle.style.animationDuration = (0.8 + Math.random() * 0.4) + 's';
+        sparkle.style.animationDelay = (Math.random() * 0.2) + 's';
+        
+        container.appendChild(sparkle);
+      }
+    }
+    
+    function createConfettiBurst(container, centerX, centerY, colors) {
+      const confettiCount = 50;
+      const shapes = ['confetti-square', 'confetti-circle', 'confetti-triangle'];
+      
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement('div');
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        confetti.className = 'particle ' + shape;
+        
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 100 + Math.random() * 150;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * distance;
+        
+        confetti.style.left = centerX + 'px';
+        confetti.style.top = centerY + 'px';
+        confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.setProperty('--dx', dx + 'px');
+        confetti.style.setProperty('--dy', dy + 'px');
+        confetti.style.setProperty('--rotation', (360 + Math.random() * 720) + 'deg');
+        confetti.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
+        confetti.style.animationDelay = (Math.random() * 0.3) + 's';
+        
+        container.appendChild(confetti);
+      }
+    }
+    
+    function createFireworkBurst(container, centerX, centerY, colors) {
+      // Create multiple firework centers
+      const fireworkCenters = [
+        { x: centerX - 80, y: centerY - 60 },
+        { x: centerX + 80, y: centerY - 60 },
+        { x: centerX - 60, y: centerY + 70 },
+        { x: centerX + 60, y: centerY + 70 },
+        { x: centerX, y: centerY - 100 }
+      ];
+      
+      for (let centerIndex = 0; centerIndex < fireworkCenters.length; centerIndex++) {
+        const center = fireworkCenters[centerIndex];
+        setTimeout(function() {
+          const particleCount = 15;
+          const color = colors[centerIndex % colors.length];
+          
+          for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle firework-particle';
+            
+            const angle = (i / particleCount) * Math.PI * 2;
+            const distance = 40 + Math.random() * 30;
+            const dx = Math.cos(angle) * distance;
+            const dy = Math.sin(angle) * distance;
+            
+            particle.style.left = center.x + 'px';
+            particle.style.top = center.y + 'px';
+            particle.style.background = color;
+            particle.style.setProperty('--dx', dx + 'px');
+            particle.style.setProperty('--dy', dy + 'px');
+            particle.style.animationDuration = (0.6 + Math.random() * 0.4) + 's';
+            particle.style.animationDelay = (Math.random() * 0.1) + 's';
+            
+            container.appendChild(particle);
+          }
+        }, centerIndex * 150);
+      }
+    }
+    
+    function createShimmerEffect(container) {
+      const shimmer = document.createElement('div');
+      shimmer.className = 'shimmer-overlay';
+      container.appendChild(shimmer);
+      
+      setTimeout(function() {
+        if (shimmer.parentNode) {
+          shimmer.remove();
+        }
+      }, 1500);
+    }
+
+    // Global functions for onclick handlers
+    window.navigateToNode = navigateToNode;
+  </script>
+</body>
+</html>
